@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .quiz-box {
+            background: white;
+            width: 500px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .progress-container {
+            background: #ddd;
+            border-radius: 20px;
+            height: 15px;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #4caf50;
+            border-radius: 20px;
+            transition: 0.3s;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            margin: 8px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .correct {
+            background-color: #4caf50 !important;
+            color: white;
+        }
+
+        .wrong {
+            background-color: #f44336 !important;
+            color: white;
+        }
+
+        #nextBtn {
+            background: #2196f3;
+            color: white;
+            display: none;
+        }
+
+        #feedback {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-box">
+    <h2>Quiz Application</h2>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <h3 id="question"></h3>
+    <div id="answers"></div>
+
+    <p id="feedback"></p>
+    <button id="nextBtn" onclick="nextQuestion()">Next</button>
+
+    <div id="result"></div>
+</div>
+
+<script>
+const quizBank = [
+    { question: "What does HTML stand for?",
+      answers: ["Hyper Text Markup Language", "High Text Machine Language", "Hyperlink Tool Multi Language"],
+      correct: 0 },
+
+    { question: "Which language styles web pages?",
+      answers: ["HTML", "CSS", "Java"],
+      correct: 1 },
+
+    { question: "Which is a JavaScript framework?",
+      answers: ["React", "HTML", "CSS"],
+      correct: 0 },
+
+    { question: "Which tag is used for images?",
+      answers: ["<img>", "<image>", "<pic>"],
+      correct: 0 },
+
+    { question: "Which is not a programming language?",
+      answers: ["Python", "HTML", "C++"],
+      correct: 1 },
+
+    { question: "Which symbol is for JS comments?",
+      answers: ["//", "#", "<!-- -->"],
+      correct: 0 },
+
+    { question: "Which company created JavaScript?",
+      answers: ["Netscape", "Microsoft", "Apple"],
+      correct: 0 },
+
+    { question: "Which CSS property changes text color?",
+      answers: ["font-color", "text-color", "color"],
+      correct: 2 },
+
+    { question: "Which HTML tag creates a link?",
+      answers: ["<a>", "<link>", "<href>"],
+      correct: 0 },
+
+    { question: "Which method selects an element by ID?",
+      answers: ["querySelector()", "getElementById()", "getClass()"],
+      correct: 1 }
+];
+
+let shuffledQuiz = quizBank.sort(() => Math.random() - 0.5);
+let currentIndex = 0;
+let score = 0;
+
+const questionEl = document.getElementById("question");
+const answersEl = document.getElementById("answers");
+const feedbackEl = document.getElementById("feedback");
+const nextBtn = document.getElementById("nextBtn");
+const progressBar = document.getElementById("progressBar");
+const resultEl = document.getElementById("result");
+
+function loadQuestion() {
+    resetState();
+
+    let currentQuestion = shuffledQuiz[currentIndex];
+    questionEl.textContent = currentQuestion.question;
+
+    currentQuestion.answers.forEach((answer, index) => {
+        const button = document.createElement("button");
+        button.textContent = answer;
+        button.onclick = () => selectAnswer(button, index);
+        answersEl.appendChild(button);
+    });
+
+    updateProgress();
+}
+
+function resetState() {
+    nextBtn.style.display = "none";
+    feedbackEl.textContent = "";
+    answersEl.innerHTML = "";
+}
+
+function selectAnswer(button, index) {
+    const correctIndex = shuffledQuiz[currentIndex].correct;
+    const buttons = answersEl.querySelectorAll("button");
+
+    buttons.forEach(btn => btn.disabled = true);
+
+    if (index === correctIndex) {
+        button.classList.add("correct");
+        feedbackEl.textContent = "Correct!";
+        score++;
+    } else {
+        button.classList.add("wrong");
+        buttons[correctIndex].classList.add("correct");
+        feedbackEl.textContent = "Wrong!";
+    }
+
+    nextBtn.style.display = "block";
+}
+
+function nextQuestion() {
+    currentIndex++;
+    if (currentIndex < shuffledQuiz.length) {
+        loadQuestion();
+    } else {
+        showResults();
+    }
+}
+
+function updateProgress() {
+    let progress = ((currentIndex) / shuffledQuiz.length) * 100;
+    progressBar.style.width = progress + "%";
+}
+
+function showResults() {
+    let percentage = Math.round((score / shuffledQuiz.length) * 100);
+    questionEl.textContent = "Quiz Completed!";
+    answersEl.innerHTML = "";
+    feedbackEl.textContent = "";
+    nextBtn.style.display = "none";
+    progressBar.style.width = "100%";
+
+    resultEl.innerHTML = `
+        <h3>Result Summary</h3>
+        <p>Total Questions: ${shuffledQuiz.length}</p>
+        <p>Correct Answers: ${score}</p>
+        <p>Score Percentage: ${percentage}%</p>
+        <button onclick="location.reload()">Restart Quiz</button>
+    `;
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
